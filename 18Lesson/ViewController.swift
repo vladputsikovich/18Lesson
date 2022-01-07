@@ -7,29 +7,50 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITextFieldDelegate, UISearchBarDelegate {
+fileprivate struct Constants {
+    static let leftBorderX: CGFloat = 20
+    static let countOfRows: CGFloat = 8
+    static let textViewHeight: CGFloat = 300
+    static let textViewY: CGFloat = 80
+    static let searchBarHeight: CGFloat = 40
+    static let addButtonText = "Перейти"
+}
 
-    var textView = UITextView()
-    var searchBar = UISearchBar()
-    var buttonLogin = UIButton()
+class ViewController: UIViewController {
+
+    private var textView = UITextView()
+    private var searchBar = UISearchBar()
+    private var buttonLogin = UIButton()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.createTextView()
-        self.createSearchBar()
-        self.addButton()
-        
+        createTextView()
+        createSearchBar()
+        addButton()
         searchBar.delegate = self
     }
     
     func createTextView() {
-        textView = UITextView(frame: CGRect(x: 20, y: 80, width: self.view.bounds.width - self.view.bounds.width / 8, height: 300))
+        textView = UITextView(
+            frame: CGRect(
+                x: Constants.leftBorderX,
+                y: Constants.textViewY,
+                width: self.view.bounds.width - self.view.bounds.width / Constants.countOfRows,
+                height: Constants.textViewHeight
+            )
+        )
         self.view.addSubview(textView)
     }
     
     func createSearchBar() {
-        searchBar = UISearchBar(frame: CGRect(x: 20, y: 20, width: self.view.bounds.width - self.view.bounds.width / 8, height: 40))
+        searchBar = UISearchBar(
+            frame: CGRect(
+                x: Constants.leftBorderX,
+                y: Constants.leftBorderX,
+                width: self.view.bounds.width - self.view.bounds.width / Constants.countOfRows,
+                height: Constants.searchBarHeight
+            )
+        )
         self.view.addSubview(searchBar)
     }
     
@@ -40,33 +61,32 @@ class ViewController: UIViewController, UITextFieldDelegate, UISearchBarDelegate
     }
     
     func addButton() {
-        buttonLogin = UIButton(frame: CGRect(x: 20, y: self.view.bounds.height - self.view.bounds.height / 8 , width: self.view.bounds.width - self.view.bounds.width / 8, height: 40))
+        buttonLogin = UIButton(
+            frame: CGRect(
+                x: Constants.leftBorderX,
+                y: self.view.bounds.height - self.view.bounds.height / Constants.countOfRows,
+                width: self.view.bounds.width - self.view.bounds.width / Constants.countOfRows,
+                height: Constants.searchBarHeight
+            )
+        )
         buttonLogin.backgroundColor = .blue
-        buttonLogin.setTitle("Перейти", for: .normal)
+        buttonLogin.setTitle(Constants.addButtonText, for: .normal)
         buttonLogin.addTarget(self, action: #selector(loginView(_:)), for: .touchUpInside)
         self.view.addSubview(buttonLogin)
     }
-    
-    func changeColor(_ wor: String) -> NSMutableAttributedString{
-        let string: NSMutableAttributedString = NSMutableAttributedString(string: textView.text)
-        let words: [String] = textView.text.lowercased().components(separatedBy:" ")
+}
 
-        for word in words {
-            if word.contains(wor) {
-                let rangeFirst: NSRange = (word as NSString).range(of: wor)
-                let rangeSecond: NSRange = (string.string as NSString).range(of: word)
-                var range: NSRange = NSRange(location: rangeSecond.location + rangeFirst.location, length: rangeFirst.length)
-                if range.location > string.length {
-                    range.location = 0
-                }
-                string.addAttribute(NSAttributedString.Key.backgroundColor, value: UIColor.yellow, range: range)
-            }
-        }
-        return string
-    }
-    
-    @objc func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        textView.attributedText = changeColor(searchText.lowercased())
+// MARK: UISearchBarDelegate
+extension ViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        textView.attributedText = Search().searchWord(
+            search: searchText.lowercased(),
+            searchInText: textView.text
+        )
     }
 }
 
+// MARK: UITextFieldDelegate
+extension ViewController: UITextFieldDelegate {
+    
+}

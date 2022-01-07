@@ -7,57 +7,108 @@
 
 import UIKit
 
+fileprivate struct Constants {
+    static let labelLeftBorderX: CGFloat = 20
+    static let labelHeight: CGFloat = 40
+}
+
 class FormController: UIViewController {
     
-    var nameLabel = UILabel()
-    var femaleLabel = UILabel()
-    var dateLabel = UILabel()
-    var mailLabel = UILabel()
-    var adressLabel = UILabel()
-    var numberLabel = UILabel()
+    private var nameLabel = UILabel()
+    private var femaleLabel = UILabel()
+    private var dateLabel = UILabel()
+    private var mailLabel = UILabel()
+    private var adressLabel = UILabel()
+    private var numberLabel = UILabel()
+
+    private var formModel: FormModel
     
-    var name = ""
-    var female = ""
-    var date = ""
-    var mail = ""
-    var adress = ""
-    var number = ""
+    init(model: FormModel) {
+        self.formModel = model
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         createLabels()
     }
-    
+    // не должно быть привязки к констане. то есть расположение элементов нужно переделать
     func createLabels() {
-        nameLabel = UILabel(frame: CGRect(x: 20, y: 20, width: self.view.bounds.width - 40, height: 40))
+        nameLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 20,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         nameLabel.textAlignment = .center
-        nameLabel.text = name
+        nameLabel.text = formModel.name
         self.view.addSubview(nameLabel)
         
-        femaleLabel = UILabel(frame: CGRect(x: 20, y: 70, width: self.view.bounds.width - 40, height: 40))
+        femaleLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 70,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         femaleLabel.textAlignment = .center
-        femaleLabel.text = female
+        femaleLabel.text = formModel.female
         self.view.addSubview(femaleLabel)
         
-        dateLabel = UILabel(frame: CGRect(x: 20, y: 120, width: self.view.bounds.width - 40, height: 40))
+        dateLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 120,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         dateLabel.textAlignment = .center
-        dateLabel.text = date
+        dateLabel.text = formModel.date
         self.view.addSubview(dateLabel)
         
-        mailLabel = UILabel(frame: CGRect(x: 20, y: 170, width: self.view.bounds.width - 40, height: 40))
+        mailLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 170,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         mailLabel.textAlignment = .center
-        mailLabel.text = mail
+        mailLabel.text = formModel.mail
         self.view.addSubview(mailLabel)
         
-        adressLabel = UILabel(frame: CGRect(x: 20, y: 220, width: self.view.bounds.width - 40, height: 40))
+        adressLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 220,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         adressLabel.textAlignment = .center
-        adressLabel.text = adress
+        adressLabel.text = formModel.adress
         self.view.addSubview(adressLabel)
         
-        numberLabel = UILabel(frame: CGRect(x: 20, y: 270, width: self.view.bounds.width - 40, height: 40))
+        numberLabel = UILabel(
+            frame: CGRect(
+                x: Constants.labelLeftBorderX,
+                y: 270,
+                width: self.view.bounds.width - Constants.labelHeight,
+                height: Constants.labelHeight
+            )
+        )
         numberLabel.textAlignment = .center
-        numberLabel.text = number
+        numberLabel.text = formModel.number
         self.view.addSubview(numberLabel)
     }
 }
