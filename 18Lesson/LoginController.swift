@@ -27,15 +27,21 @@ fileprivate struct Constants {
     static let adressAlertText = "Вы не ввели адресс"
     static let numberAlertText = "Вы не ввели номер"
     static let formatPhone = "+XXX (XX) XXX-XX-XX"
+    static let validationTypeText = "text"
+    static let validationTypeEmail = "email"
+    static let keyboardUp: CGFloat = -50
+    static let keyboardHeight: CGFloat = 80
 }
 
 struct TextFieldForm {
     var validation: String
     var textField: UITextField
     var type: String
+    var alertText: String
 }
 
 class LoginController: UIViewController {
+    
     private var questLabel = UILabel()
     private var nameTextField = UITextField()
     private var femaleTextField = UITextField()
@@ -43,9 +49,8 @@ class LoginController: UIViewController {
     private var mailTextField = UITextField()
     private var adressTextField = UITextField()
     private var numberTextField = UITextField()
-    
+    private var textFields = [TextFieldForm]()
     private var alert = UIAlertController()
-    
     private var applyButton = UIButton()
     
     override func viewDidLoad() {
@@ -75,7 +80,8 @@ class LoginController: UIViewController {
             object: nil
         )
     }
-    // не должно быть привязки к констане. то есть расположение элементов нужно переделать
+    
+    //!!! не должно быть привязки к констане. то есть расположение элементов нужно переделать
     func createQuestLabel() {
         questLabel = UILabel(
             frame: CGRect(
@@ -100,6 +106,14 @@ class LoginController: UIViewController {
             )
         )
         nameTextField.placeholder = Constants.nameTextFieldText
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeText,
+                textField: nameTextField,
+                type: Constants.nameTextFieldText,
+                alertText: Constants.nameAlertText
+            )
+        )
         self.view.addSubview(nameTextField)
     }
     
@@ -113,9 +127,17 @@ class LoginController: UIViewController {
             )
         )
         femaleTextField.placeholder = Constants.femaleTextFieldText
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeText,
+                textField: femaleTextField,
+                type: Constants.femaleTextFieldText,
+                alertText: Constants.femaleAlertText
+            )
+        )
         self.view.addSubview(femaleTextField)
     }
-    
+
     func createDateText() {
         dateTextField = UITextField(
             frame: CGRect(
@@ -126,10 +148,18 @@ class LoginController: UIViewController {
             )
         )
         dateTextField.placeholder = Constants.dateTextFieldText
-        numberTextField.keyboardType = .decimalPad
+        dateTextField.keyboardType = .decimalPad
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeText,
+                textField: dateTextField,
+                type: Constants.dateTextFieldText,
+                alertText: Constants.dateAlertText
+            )
+        )
         self.view.addSubview(dateTextField)
     }
-    
+
     func createMailText() {
         mailTextField = UITextField(
             frame: CGRect(
@@ -140,7 +170,15 @@ class LoginController: UIViewController {
             )
         )
         mailTextField.placeholder = Constants.mailTextFieldText
-        numberTextField.keyboardType = .emailAddress
+        mailTextField.keyboardType = .emailAddress
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeEmail,
+                textField: mailTextField,
+                type: Constants.mailTextFieldText,
+                alertText: Constants.mailAlertText
+            )
+        )
         self.view.addSubview(mailTextField)
     }
     
@@ -154,6 +192,14 @@ class LoginController: UIViewController {
             )
         )
         adressTextField.placeholder = Constants.adressTextFieldText
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeText,
+                textField: adressTextField,
+                type: Constants.adressTextFieldText,
+                alertText: Constants.adressAlertText
+            )
+        )
         self.view.addSubview(adressTextField)
     }
     
@@ -168,6 +214,14 @@ class LoginController: UIViewController {
         )
         numberTextField.placeholder = Constants.numberTextFieldText
         numberTextField.keyboardType = .numberPad
+        textFields.append(
+            TextFieldForm(
+                validation: Constants.validationTypeText,
+                textField: numberTextField,
+                type: Constants.numberTextFieldText,
+                alertText: Constants.numberAlertText
+            )
+        )
         self.view.addSubview(numberTextField)
     }
     
@@ -175,12 +229,12 @@ class LoginController: UIViewController {
         if isValidInput() {
             let formController = FormController(
                 model: FormModel(
-                    name: nameTextField.text ?? "",
-                    female: femaleTextField.text ?? "",
-                    date: dateTextField.text ?? "",
-                    mail: mailTextField.text ?? "",
-                    adress: adressTextField.text ?? "",
-                    number: numberTextField.text ?? ""
+                    name: nameTextField.text ?? .init(),
+                    female: femaleTextField.text ?? .init(),
+                    date: dateTextField.text ?? .init(),
+                    mail: mailTextField.text ?? .init(),
+                    adress: adressTextField.text ?? .init(),
+                    number: numberTextField.text ?? .init()
                 )
             )
             formController.modalPresentationStyle = .fullScreen
@@ -192,7 +246,7 @@ class LoginController: UIViewController {
         applyButton = UIButton(
             frame: CGRect(
                 x: Constants.leftBorderX,
-                y: self.view.bounds.height - 80,
+                y: self.view.bounds.height - Constants.keyboardUp,
                 width: self.view.bounds.width - Constants.textFieldHeight,
                 height: Constants.textFieldHeight
             )
@@ -203,10 +257,11 @@ class LoginController: UIViewController {
         self.view.addSubview(applyButton)
     }
     
+    // контстанта
     @objc func keyboardWillShow(_ notification: Notification) {
         if ((notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue) != nil {
             if self.view.frame.origin.y == .zero {
-                self.view.frame.origin.y = -50
+                self.view.frame.origin.y = Constants.keyboardUp
             }
         }
 
@@ -221,68 +276,35 @@ class LoginController: UIViewController {
     }
     
     func isValidInput() -> Bool {
-        if nameTextField.text == "" {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.nameAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
+        var isValid = true
+        textFields.forEach { textField in
+            if textField.validation == "text" {
+                if textField.textField.text == "" {
+                    alert = UIAlertController(
+                        title: Constants.errorAlertText,
+                        message: textField.alertText,
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    isValid = false
+                }
+            }
+            if textField.validation == "email" {
+                guard let mail = mailTextField.text else { return }
+                if Format.isValidEmail(mail) {
+                    alert = UIAlertController(
+                        title: Constants.errorAlertText,
+                        message: textField.alertText,
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    isValid = false
+                }
+            }
         }
-        if femaleTextField.text == "" {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.femaleAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
-        }
-        if adressTextField.text == "" {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.adressAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
-        }
-        if dateTextField.text == "" {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.dateAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
-        }
-        if numberTextField.text == "" {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.numberAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
-        }
-        guard let mail = mailTextField.text else { return false }
-        if Format.isValidEmail(mail) {
-            alert = UIAlertController(
-                title: Constants.errorAlertText,
-                message: Constants.mailAlertText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: Constants.okAlertText, style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return false
-        }
-        return true
+        return isValid
     }
 }
 
@@ -297,31 +319,13 @@ extension LoginController: UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        
-        if nameTextField.isFirstResponder {
-            nameTextField.resignFirstResponder()
-            return femaleTextField.becomeFirstResponder()
+        var firstResponder = false
+        textFields.forEach { field in
+            if field.textField.isFirstResponder {
+                field.textField.resignFirstResponder()
+                firstResponder = next?.becomeFirstResponder() ?? false
+            }
         }
-        if femaleTextField.isFirstResponder {
-            femaleTextField.resignFirstResponder()
-            return dateTextField.becomeFirstResponder()
-        }
-        if dateTextField.isFirstResponder {
-            dateTextField.resignFirstResponder()
-            return mailTextField.becomeFirstResponder()
-        }
-        if mailTextField.isFirstResponder {
-            mailTextField.resignFirstResponder()
-            return adressTextField.becomeFirstResponder()
-        }
-        if mailTextField.isFirstResponder {
-            mailTextField.resignFirstResponder()
-            return adressTextField.becomeFirstResponder()
-        }
-        if adressTextField.isFirstResponder {
-            adressTextField.resignFirstResponder()
-            return numberTextField.becomeFirstResponder()
-        }
-        return numberTextField.resignFirstResponder()
+        return firstResponder
     }
 }
